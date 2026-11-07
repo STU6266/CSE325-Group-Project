@@ -5,6 +5,7 @@ BYU-Idaho – .NET Software Development
 ## Team Members
 - Steven Kemendics
 - Wadzanai Murombedzi
+- David Esumei
 
 ## Project Ideas
 
