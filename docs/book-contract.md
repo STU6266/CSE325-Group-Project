@@ -45,10 +45,15 @@ The service will provide these operations:
 ## Frontend and Backend
 
 Steven:
-Implement Book model, service and database.
+- Book model, services, database, authentication and security.
+
+David:
+- Navigation, book pages and forms.
+- Connect the frontend to IBookService.
 
 Wadzanai:
-Build pages using the agreed service methods.
+- Reading status and filter components.
+- Responsive design and documentation.
 
 The frontend can use sample data while
 the real database service is being developed.

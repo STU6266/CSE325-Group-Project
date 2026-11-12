@@ -30,17 +30,21 @@
 - Data: EF Core database configuration
 
 ## Responsibilities
+
 Steven:
-- Project setup
-- Authentication
-- Models, Services and Database
-- Security and Deployment
+- Project setup, authentication and security
+- Models, services and database
+- Deployment
+
+David:
+- Navigation and layout
+- Book list and forms
+- Frontend integration
 
 Wadzanai:
-- Pages and Forms
-- Navigation and Layout
-- Reading Status and Filters
-- Responsive Design
+- Reading status and filter components
+- Responsive design
+- Documentation and testing
 
 ## Rules
 - Frontend uses the shared service interface.
