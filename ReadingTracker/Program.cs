@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ReadingTracker.Components;
 using ReadingTracker.Components.Account;
 using ReadingTracker.Data;
+using ReadingTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,12 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+// Temporary sample data for local frontend development.
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IBookService, MockBookService>();
+}
 
 var app = builder.Build();
 
