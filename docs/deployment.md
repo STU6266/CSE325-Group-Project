@@ -1,74 +1,102 @@
-# Reading Tracker - Deployment
+# Reading Tracker - Deployment and Persistence (RT-06)
 
-## Technology
+## Confirmed setup
 
-- .NET 10
-- ASP.NET Core Blazor
-- SQLite
-- Docker
-- Railway
+- Runtime: ASP.NET Core Blazor, .NET 10, EF Core SQLite.
+- Host: Railway, connected to the GitHub `main` branch.
+- Build: multi-stage root `Dockerfile`, Linux runtime.
+- Service environment: `Production`.
+- Railway service variable: `PersistentDataPath=/data`.
+- Railway persistent volume mounted at `/data`.
+- SQLite database: `/data/app.db`.
+- ASP.NET Core Data Protection key files: `/data/keys`.
+- One application instance. Do not scale SQLite instances horizontally.
 
-## Docker
+**Verification on 2026-11-14:** Railway deployment logs reported
+`Applying migration '20261114110012_AddBooks'` on first start and
+`No migrations were applied. The database is already up to date.` after a
+Redeploy using the same volume. Both runs reported `Application started`
+and listened on port 8080. This demonstrates persistent migration history
+across a live Railway redeploy, **not yet a complete browser workflow test
+with saved user books**.
 
-Build from the repository root:
+Local Docker checks also passed: HTTP 200, database schema, data marker and
+Data Protection key files survived a container replacement, and SQLite
+`PRAGMA integrity_check` returned `ok`.
 
+## Build and startup
+
+From the repository root:
+
+```bash
 docker build -t readingtracker:railway .
+```
 
-The container listens on PORT, default 8080.
+Railway builds the root Dockerfile and passes its `PORT` at runtime
+(default 8080). Production app startup invokes
+`ApplicationDbContext.Database.MigrateAsync()` for existing migrations.
 
-## Railway Settings
+In Development, run with `dotnet run --launch-profile http` inside the
+`ReadingTracker` directory. To test the real database service locally,
+set `UseMockBookService=false`. Production always uses `BookService`.
 
-Connect the GitHub repository and use the root Dockerfile.
+## Railway deployment steps (for W05)
 
-Create a persistent volume mounted at:
+1. Create a Railway project and connect the GitHub repository.
+2. Deploy from `main` using the root `Dockerfile`.
+3. Add a **persistent volume** to the web service at exactly `/data`.
+4. In this service's **Variables** tab for the Production environment,
+   set `PersistentDataPath` to `/data`.
+5. Apply pending configuration changes and deploy.
+6. Check logs for an applied migration or "already up to date" followed by
+   `Application started`.
+7. Redeploy and verify "already up to date" without re-creating the schema.
+8. Only after security and email setup, enable a public HTTPS domain,
+   test authenticated add/edit/delete and verify saved book records after
+   a further redeploy.
+9. Share the verified **test URL** with David and Wadzanai only when ready.
 
-/data
+## Where configuration and secrets belong
 
-Set the service variable:
+- Use Railway **service variables** in the right environment for connection
+  strings, API keys and other runtime secrets; **never** commit actual values
+  to GitHub, markdown, `appsettings.json` or screenshots.
+- The current `PersistentDataPath=/data` setting is a **path**, not a secret.
+- SQLite storage and Data Protection keyring are files on the mounted volume.
+  Railway environment variables do **not** encrypt those files.
+- If a real email provider is added, configure its credentials as Railway
+  service secrets (or a dedicated secret manager), not in source control.
+- For local development, use .NET User Secrets or local environment variables.
+  Do not paste tokens, credentials, database contents or confirmation links
+  into public issue comments or logs.
+- Restrict Railway project access to authorized team members.
+- Protect the Data Protection keyring at rest (e.g., managed key-encryption
+  strategy) before using the service for real personal data; current
+  file-based key persistence emits an unencrypted-key warning.
+- Treat volume snapshots/backups and restoring them as a separate operational
+  requirement. Do not assume that keeping a volume is a complete backup.
 
-PersistentDataPath=/data
+## Production security limitations (not yet resolved)
 
-The app stores:
+- ASP.NET Core Identity currently uses **IdentityNoOpEmailSender**. It does
+  **not** deliver real email confirmation links. Do not advertise public
+  account registration as production-ready.
+- Review HTTPS termination and **forwarded headers / trusted proxy**
+  handling on Railway before enabling a public domain. The local Docker
+  warning about missing HTTPS port does not by itself validate the public
+  proxy configuration.
+- Data Protection XML keys persist on the volume but currently have no
+  configured XML encryptor. This is not suitable as-is for sensitive
+  production user data.
+- Full browser validation using two real accounts, saved books, and a
+  Railway redeploy is still pending until the frontend pages exist.
 
-- SQLite database: /data/app.db
-- Login protection keys: /data/keys
+## Completion boundary
 
-Keep one app instance when using SQLite.
+**RT-06 (W03 infrastructure verification):** Host selected, .NET runtime
+started, cloud database migration history persisted across a redeploy,
+configuration location documented, and deployment steps written.
 
-## Database
-
-The app applies EF Core migrations when starting
-outside the Development environment.
-
-Use the existing EF Core migrations.
-
-Review and back up data before future schema changes.
-
-## Security
-
-Do not commit passwords, database files or secrets.
-
-Use HTTPS through the hosting provider.
-
-Review trusted proxy and forwarded-header settings
-before making the service public.
-
-The starter currently uses a no-op email sender.
-Real email confirmation is not ready for public use.
-
-Data Protection keys are persisted on the volume.
-File-based key storage is not encrypted at rest
-by this configuration.
-
-## Verification Before Completion
-
-- Docker image builds.
-- Container starts.
-- Database is created on the persistent volume.
-- Registration and login work.
-- Data remains after a restart.
-- The deployed website is accessible.
-- Production secrets and email handling are reviewed.
-
-Do not mark hosting as fully complete until
-the live deployment and persistence test pass.
+**Not covered by RT-06:** The W05 first fully working cloud version and
+the W06 production/security/readiness testing. Do not mark those later
+tasks completed based only on Railway startup logs.
