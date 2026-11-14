@@ -25,22 +25,26 @@ Users will be able to create an account, add books, change their reading status,
 - SQLite
 - GitHub and Trello
 
-## Project Status
+## Project Status (November 14, 2026)
 
-The Blazor starter project is available on GitHub.
+Implemented and merged into `main`:
+- .NET 10 Blazor starter with ASP.NET Core Identity (local registration, email
+  confirmation, login and logout verified).
+- Book model, ReadingStatus enum and IBookService interface.
+- EF Core SQLite Books migration and persistent BookService with server-side
+  owner checks (15 isolated CRUD/security tests passed).
+- Development-only MockBookService with sample books.
+- Docker image and Railway deployment: production startup succeeded; SQLite
+  migration history persisted across a Railway redeploy.
+- Architecture, API, deployment and proposed UI planning documentation.
 
-Already prepared:
-- Blazor application
-- User registration and login
-- Book model and reading status
-- IBookService interface
-- Architecture documentation
-
-Still being developed:
-- Book database and BookService
-- Book list and forms
-- Reading status and filters
-- Testing and deployment
+Still being developed or reviewed:
+- David's navigation, My Books page and Add/Edit/Delete forms.
+- Wadzanai's status/filter components and responsive checks.
+- UI wireframe/team review and full end-to-end browser tests with two accounts.
+- Production email sender, trusted HTTPS proxy settings and Data Protection
+  keyring encryption before public registration.
+- Final cloud app with the book workflow and demo.
 
 ## How to Run the Project
 
@@ -91,7 +95,7 @@ http://localhost:5261
 
 You can create an account and log in.
 
-Note: These setup steps still need to be checked on a fresh clone.
+Note: These setup steps still need to be checked on a fresh clone. Development uses MockBookService by default; launch with the environment variable `UseMockBookService=false` to test the real database service.
 
 ## Team Responsibilities
 
@@ -114,23 +118,35 @@ Note: These setup steps still need to be checked on a fresh clone.
 - Responsive design
 - Documentation and testing
 
-## GitHub Workflow
+## GitHub Workflow and File Ownership
 
-1. Update your local main branch.
-2. Create your own feature branch.
-3. Work on your assigned files.
-4. Commit your changes.
-5. Push your branch to GitHub.
-6. Create a pull request to main.
+1. Run `git switch main && git pull --ff-only origin main`.
+2. Start a branch such as `feature/david-books-page` or
+   `feature/wadzanai-status-filter`.
+3. Edit only the files in your responsibility area; coordinate shared changes.
+4. Run `dotnet build ReadingTracker/ReadingTracker.csproj` from the repo root.
+5. Commit, push, open a pull request targeting `main`, and review before merge.
+6. After merge, teammates pull `main` again. Avoid direct commits to `main`.
 
-Please do not push directly to main.
+**Ownership:** Steven owns `Models/`, `Services/`, `Data/`, Identity
+integration, `Program.cs` and deployment. David owns book pages, forms and
+main navigation/layout. Wadzanai owns standalone status/filter components,
+design guidance and responsive testing. Shared interfaces must be discussed
+before changing them. Do not edit a teammate's Razor files without agreement.
 
-Do not commit local databases, passwords, or secret files.
+**Still to confirm for RT-04:** David and Wadzanai must verify repository
+access, their own feature branches and agreement with these rules.
+
+Never commit SQLite DBs, passwords, tokens, API keys or secret files.
 
 ## Project Documentation
 
-- docs/architecture.md
-- docs/book-contract.md
+- [Architecture](docs/architecture.md)
+- [Book interface contract](docs/book-contract.md)
+- [Frontend development guide](docs/frontend-start.md)
+- [Page wireframes (for David's review)](docs/ui-planning.md)
+- [UI style guide (team baseline)](docs/ui-style-guide.md)
+- [Railway deployment and security notes](docs/deployment.md)
 
 ## Project Goal
 
