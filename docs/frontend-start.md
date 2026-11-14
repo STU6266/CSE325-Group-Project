@@ -51,14 +51,31 @@ MockBookService provides three example books:
 - Dune - Reading
 - The Hunger Games - Want to Read
 
-It is registered only in the Development environment.
+It is the **default service in Development**. To use the real SQLite BookService
+locally, run from the `ReadingTracker` folder:
+
+```bash
+UseMockBookService=false dotnet run --launch-profile http
+```
+
+Production always uses the real BookService.
 
 The mock keeps changes in memory.
 Changes are not saved to the database.
 A new service scope starts with fresh sample data.
 
 The mock does not provide real user security.
-The real BookService will enforce book ownership.
+The real BookService now implements persistent CRUD and enforces book ownership
+using the authenticated server-side user ID; it passed 15 isolated tests.
+The new book UI still needs an end-to-end two-account browser test.
+
+For local registration, this starter app requires email confirmation but does
+not send real email. The Registration Confirmation page exposes a local
+confirmation link for developer testing. Never use that workflow for public
+production registration.
+
+See [page sketches](ui-planning.md) and
+[UI style guide](ui-style-guide.md) before building new pages.
 
 ## Who Works on What?
 
