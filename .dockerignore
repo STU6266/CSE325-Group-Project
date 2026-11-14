@@ -1,0 +1,14 @@
+.git
+.gitignore
+**/bin
+**/obj
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/*.sqlite
+**/*.sqlite3
+**/.env
+**/.env.*
+**/appsettings.Production.json
+**/secrets.json
+.vscode

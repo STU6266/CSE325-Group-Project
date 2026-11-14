@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,39 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// Use persistent storage when running in a container.
+var persistentDataPath = builder.Configuration["PersistentDataPath"];
+
+if (!builder.Environment.IsDevelopment() &&
+    string.IsNullOrWhiteSpace(persistentDataPath))
+{
+    throw new InvalidOperationException(
+        "PersistentDataPath must be configured in production.");
+}
+
+string connectionString;
+
+if (string.IsNullOrWhiteSpace(persistentDataPath))
+{
+    connectionString = builder.Configuration
+        .GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException(
+            "DefaultConnection not found.");
+}
+else
+{
+    Directory.CreateDirectory(persistentDataPath);
+
+    var keysPath = Path.Combine(persistentDataPath, "keys");
+    Directory.CreateDirectory(keysPath);
+
+    builder.Services.AddDataProtection()
+        .SetApplicationName("ReadingTracker")
+        .PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+
+    connectionString =
+        $"Data Source={Path.Combine(persistentDataPath, "app.db")};Cache=Shared";
+}
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -51,6 +84,17 @@ else
 }
 
 var app = builder.Build();
+
+// Apply existing migrations on a single production instance.
+if (!app.Environment.IsDevelopment())
+{
+    await using var scope = app.Services.CreateAsyncScope();
+
+    var db = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
+    await db.Database.MigrateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
