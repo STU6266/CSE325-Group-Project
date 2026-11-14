@@ -24,7 +24,7 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -39,10 +39,15 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-// Temporary sample data for local frontend development.
-if (builder.Environment.IsDevelopment())
+// Use sample books during local frontend development.
+if (builder.Environment.IsDevelopment() &&
+    builder.Configuration.GetValue("UseMockBookService", true))
 {
     builder.Services.AddScoped<IBookService, MockBookService>();
+}
+else
+{
+    builder.Services.AddScoped<IBookService, BookService>();
 }
 
 var app = builder.Build();
