@@ -105,8 +105,7 @@ Login. Existing Identity routes must remain usable.
 +--------------------------------+
 ```
 
-- Title and Author are required. Limits must match the Book model
-  validation (verify against `docs/book-contract.md`).
+- Title is required, maximum 200 characters. Author is required, maximum 120 characters (matches `docs/book-contract.md`).
 - Default status is `WantToRead`.
 - `UserId` is never shown or submitted as an editable field.
 - Disable Save and show feedback while a save is pending.
