@@ -1,7 +1,21 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Reading Tracker</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container py-4">
+    <h1 class="mb-3">Reading Tracker</h1>
+    <p class="lead">Track the books you want to read, are reading, or have finished.</p>
+    <p class="mb-4">Keep your own private reading list in one place.</p>
 
-Welcome to your new app.
+    <AuthorizeView>
+        <Authorized>
+            <a class="btn btn-primary" href="books">My Books</a>
+        </Authorized>
+        <NotAuthorized>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary" href="Account/Register">Register</a>
+                <a class="btn btn-outline-secondary" href="Account/Login">Log in</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
