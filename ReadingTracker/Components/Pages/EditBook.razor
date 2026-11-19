@@ -1,0 +1,107 @@
+@page "/books/edit/{Id:int}"
+@using Microsoft.AspNetCore.Authorization
+@using ReadingTracker.Components.Books
+@using ReadingTracker.Models
+@using ReadingTracker.Services
+@attribute [Authorize]
+@inject IBookService BookService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Book</PageTitle>
+
+<div class="container">
+    <h1 class="mb-3">Edit Book</h1>
+
+    @if (loading)
+    {
+        <p role="status">Loading book...</p>
+    }
+    else if (loadFailed)
+    {
+        <div class="alert alert-danger" role="alert">Could not load the book. Please try again.</div>
+        <a class="btn btn-outline-secondary" href="books">Back to My Books</a>
+    }
+    else if (book is null)
+    {
+        <div class="alert alert-warning" role="alert">Book not found.</div>
+        <a class="btn btn-outline-secondary" href="books">Back to My Books</a>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12 col-lg-6">
+                <BookForm Model="book"
+                          SubmitText="Save Changes"
+                          IsSaving="isSaving"
+                             ErrorMessage="@errorMessage"
+                          OnSave="SaveAsync" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Book? book;
+    private bool loading = true;
+    private bool loadFailed;
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        loadFailed = false;
+
+        try
+        {
+            var existing = await BookService.GetMyBookAsync(Id);
+
+            // Work on a copy so nothing changes until Save succeeds.
+            book = existing is null ? null : new Book
+            {
+                Id = existing.Id,
+                Title = existing.Title,
+                Author = existing.Author,
+                Status = existing.Status,
+                UserId = existing.UserId
+            };
+        }
+        catch (Exception)
+        {
+            loadFailed = true;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (book is null) return;
+
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            var updated = await BookService.UpdateBookAsync(book);
+
+            if (updated)
+            {
+                Navigation.NavigateTo("books?message=updated");
+                return;
+            }
+
+            errorMessage = "Book not found, so it could not be updated.";
+        }
+        catch (Exception)
+        {
+            errorMessage = "Could not save your changes. Please check the fields and try again.";
+        }
+
+        isSaving = false;
+    }
+}

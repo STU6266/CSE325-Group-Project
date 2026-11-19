@@ -1,0 +1,58 @@
+@using ReadingTracker.Models
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger" />
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@ErrorMessage</div>
+    }
+
+    <div class="mb-3">
+        <label for="bookTitle" class="form-label">Title *</label>
+        <InputText id="bookTitle" class="form-control" @bind-Value="Model.Title" />
+        <ValidationMessage For="() => Model.Title" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label for="bookAuthor" class="form-label">Author *</label>
+        <InputText id="bookAuthor" class="form-control" @bind-Value="Model.Author" />
+        <ValidationMessage For="() => Model.Author" class="text-danger" />
+    </div>
+
+    <div class="mb-4">
+        <label for="bookStatus" class="form-label">Status</label>
+        <InputSelect id="bookStatus" class="form-select" @bind-Value="Model.Status">
+            @foreach (var status in Enum.GetValues<ReadingStatus>())
+            {
+                <option value="@status">@StatusText(status)</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+            @(IsSaving ? "Saving..." : SubmitText)
+        </button>
+        <a class="btn btn-outline-secondary" href="books">Cancel</a>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired] public Book Model { get; set; } = default!;
+    [Parameter] public string SubmitText { get; set; } = "Save";
+    [Parameter] public bool IsSaving { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private async Task HandleValidSubmit() => await OnSave.InvokeAsync();
+
+    private static string StatusText(ReadingStatus status) => status switch
+    {
+        ReadingStatus.WantToRead => "Want to Read",
+        ReadingStatus.Reading => "Reading",
+        ReadingStatus.Finished => "Finished",
+        _ => status.ToString()
+    };
+}
