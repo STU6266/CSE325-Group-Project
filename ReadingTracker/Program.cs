@@ -72,9 +72,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-// Use sample books during local frontend development.
+// Allow optional sample books during local development.
 if (builder.Environment.IsDevelopment() &&
-    builder.Configuration.GetValue("UseMockBookService", true))
+    builder.Configuration.GetValue("UseMockBookService", false))
 {
     builder.Services.AddScoped<IBookService, MockBookService>();
 }
@@ -107,7 +107,22 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+// Redirect missing browser pages to a fresh request.
+app.UseStatusCodePages(context =>
+{
+    var http = context.HttpContext;
+
+    if (http.Response.StatusCode == StatusCodes.Status404NotFound &&
+        HttpMethods.IsGet(http.Request.Method) &&
+        http.Request.Path != "/not-found" &&
+        http.Request.Headers.Accept.ToString().Contains(
+            "text/html", StringComparison.OrdinalIgnoreCase))
+    {
+        http.Response.Redirect("/not-found");
+    }
+
+    return Task.CompletedTask;
+});
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
