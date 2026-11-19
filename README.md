@@ -95,7 +95,7 @@ http://localhost:5261
 
 You can create an account and log in.
 
-Note: These setup steps still need to be checked on a fresh clone. Development uses MockBookService by default; launch with the environment variable `UseMockBookService=false` to test the real database service.
+Note: These setup steps still need to be checked on a fresh clone. Development uses the real BookService by default. Set `UseMockBookService=true` to use temporary sample books.
 
 ## Team Responsibilities
 
