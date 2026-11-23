@@ -63,7 +63,10 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
+        // Allow unconfirmed test accounts only when explicitly enabled for a course demo.
+        // Normal deployments still require email confirmation.
+        options.SignIn.RequireConfirmedAccount =
+            !builder.Configuration.GetValue("AllowUnconfirmedDemoAccounts", false);
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
