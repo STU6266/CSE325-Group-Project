@@ -38,7 +38,8 @@ Railway builds the root Dockerfile and passes its `PORT` at runtime
 
 In Development, run with `dotnet run --launch-profile http` inside the
 `ReadingTracker` directory. To test the real database service locally,
-set `UseMockBookService=false`. Production always uses `BookService`.
+set `UseMockBookService=true` to use optional sample books. Development
+and Production both use `BookService` by default.
 
 ## Railway deployment steps (for W05)
 
@@ -51,10 +52,32 @@ set `UseMockBookService=false`. Production always uses `BookService`.
 6. Check logs for an applied migration or "already up to date" followed by
    `Application started`.
 7. Redeploy and verify "already up to date" without re-creating the schema.
-8. Only after security and email setup, enable a public HTTPS domain,
-   test authenticated add/edit/delete and verify saved book records after
+8. Only after reviewing HTTPS and account-confirmation security, use a
+   public HTTPS domain for controlled testing. Either configure real email
+   delivery or explicitly enable demo-only unconfirmed accounts as below.
+   Test authenticated add/edit/delete and verify saved book records after
    a further redeploy.
 9. Share the verified **test URL** with David and Wadzanai only when ready.
+
+## Controlled course demo registration (W05)
+
+ASP.NET Core Identity normally requires email confirmation. The current
+`IdentityNoOpEmailSender` does not send any messages, so ordinary new users
+cannot complete confirmation in Production. The manual confirmation link is
+now limited to Development and is never shown in Production.
+
+For a **temporary course demonstration using throwaway accounts only**, set
+`AllowUnconfirmedDemoAccounts=true` as a Railway service variable. This lets
+new test accounts sign in without email confirmation. Do not enable this for
+real users or sensitive data; anyone can register with an unverified email
+address. Use artificial email addresses and unique test passwords, and turn
+the variable off again after the demo. Password recovery by email still does
+not work without a real email sender. The recommended long-term solution is
+an actual email provider and verified addresses.
+
+This opt-in setting does **not** validate Railway HTTPS, trusted proxy
+settings, backups, or all browser workflows. Complete those checks before
+marking RT-18 finished. Never put the test passwords in repository files.
 
 ## Where configuration and secrets belong
 
@@ -78,9 +101,9 @@ set `UseMockBookService=false`. Production always uses `BookService`.
 
 ## Production security limitations (not yet resolved)
 
-- ASP.NET Core Identity currently uses **IdentityNoOpEmailSender**. It does
-  **not** deliver real email confirmation links. Do not advertise public
-  account registration as production-ready.
+- ASP.NET Core Identity still uses **IdentityNoOpEmailSender**. It does
+  **not** deliver real email confirmation links. The limited opt-in demo
+  registration option described above is not verified-email registration.
 - Review HTTPS termination and **forwarded headers / trusted proxy**
   handling on Railway before enabling a public domain. The local Docker
   warning about missing HTTPS port does not by itself validate the public
