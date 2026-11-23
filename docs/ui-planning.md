@@ -214,5 +214,5 @@ Adjustments made to the original draft:
 
 - [X] David confirms or adjusts routes, wireframes and flow.
 - [ ] Wadzanai confirms filter/status component design and accessibility.
-- [ ] Steven checks that the UI uses `IBookService` for all operations.
+- [x] Steven checks that the UI uses `IBookService` for all operations.
 - [ ] Update this document after feedback before closing RT-03.
