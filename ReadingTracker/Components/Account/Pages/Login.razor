@@ -142,6 +142,22 @@
         }
         else
         {
+            // Record only login status flags, never user identifiers or credentials.
+            // This distinguishes missing accounts from confirmation and password failures.
+            var existingUser = await UserManager.FindByNameAsync(Input.Email);
+            bool? emailConfirmed = existingUser is null
+                ? null
+                : await UserManager.IsEmailConfirmedAsync(existingUser);
+
+            Logger.LogWarning(
+                "Login rejected: AccountExists={AccountExists}, EmailConfirmed={EmailConfirmed}, " +
+                "NotAllowed={NotAllowed}, LockedOut={LockedOut}, RequiresTwoFactor={RequiresTwoFactor}",
+                existingUser is not null,
+                emailConfirmed,
+                result.IsNotAllowed,
+                result.IsLockedOut,
+                result.RequiresTwoFactor);
+
             errorMessage = "Error: Invalid login attempt.";
         }
     }
