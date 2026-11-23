@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <!-- Docker restores the .csproj before Razor files are copied; ensure the Blazor framework JS is included. -->
+    <RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-ReadingTracker-30aad82a-45f8-4d00-85e4-e3c7b0bca3f3</UserSecretsId>
