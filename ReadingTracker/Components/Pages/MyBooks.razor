@@ -1,6 +1,7 @@
 @page "/books"
 @using Microsoft.AspNetCore.Authorization
 @using ReadingTracker.Models
+@using ReadingTracker.Components.Books
 @using ReadingTracker.Services
 @attribute [Authorize]
 @inject IBookService BookService
@@ -38,15 +39,7 @@
     }
     else
     {
-        <div class="mb-4">
-            <label for="statusFilter" class="form-label">Filter</label>
-            <select id="statusFilter" class="form-select" @bind="filter">
-                <option value="All">All Books</option>
-                <option value="WantToRead">Want to Read</option>
-                <option value="Reading">Reading</option>
-                <option value="Finished">Finished</option>
-            </select>
-        </div>
+        <StatusFilter @bind-Value="filter" />
 
         @if (!FilteredBooks.Any())
         {
@@ -68,7 +61,7 @@
                                 <h2 class="h5 card-title">@book.Title</h2>
                                 <p class="card-text mb-2">@book.Author</p>
                                 <p class="mb-3">
-                                    <span class="@StatusBadgeClass(book.Status)">@StatusText(book.Status)</span>
+                                    <ReadingStatusBadge Status="@book.Status" />
                                 </p>
                                 <div class="d-flex flex-wrap gap-2">
                                     <a class="btn btn-outline-primary" href="@($"books/edit/{book.Id}")">Edit</a>
@@ -128,20 +121,4 @@
 
     private void ShowAll() => filter = "All";
 
-    // Temporary inline display. Replace with Wadzanai's ReadingStatusBadge during RT-17.
-    private static string StatusText(ReadingStatus status) => status switch
-    {
-        ReadingStatus.WantToRead => "Want to Read",
-        ReadingStatus.Reading => "Reading",
-        ReadingStatus.Finished => "Finished",
-        _ => status.ToString()
-    };
-
-    private static string StatusBadgeClass(ReadingStatus status) => status switch
-    {
-        ReadingStatus.WantToRead => "badge text-bg-secondary",
-        ReadingStatus.Reading => "badge text-bg-primary",
-        ReadingStatus.Finished => "badge text-bg-success",
-        _ => "badge text-bg-secondary"
-    };
 }
