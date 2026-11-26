@@ -1,0 +1,26 @@
+<div class="mb-4">
+    <label for="reading-status-filter" class="form-label">Filter</label>
+    <select id="reading-status-filter"
+            class="form-select"
+            value="@Value"
+            @onchange="OnFilterChanged">
+        <option value="All">All Books</option>
+        <option value="WantToRead">Want to Read</option>
+        <option value="Reading">Reading</option>
+        <option value="Finished">Finished</option>
+    </select>
+</div>
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = "All";
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private Task OnFilterChanged(ChangeEventArgs e)
+    {
+        var selected = e.Value?.ToString() ?? "All";
+        return ValueChanged.InvokeAsync(selected);
+    }
+}
