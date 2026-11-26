@@ -1,0 +1,24 @@
+@using ReadingTracker.Models
+
+<span class="@BadgeCss">@StatusLabel</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public ReadingStatus Status { get; set; }
+
+    private string StatusLabel => Status switch
+    {
+        ReadingStatus.WantToRead => "Want to Read",
+        ReadingStatus.Reading => "Reading",
+        ReadingStatus.Finished => "Finished",
+        _ => "Unknown"
+    };
+
+    private string BadgeCss => Status switch
+    {
+        ReadingStatus.WantToRead => "badge text-bg-secondary",
+        ReadingStatus.Reading => "badge text-bg-primary",
+        ReadingStatus.Finished => "badge text-bg-success",
+        _ => "badge text-bg-secondary"
+    };
+}
